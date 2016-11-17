@@ -1,7 +1,7 @@
 (ns codebreaker.core-test
-  (:require [clojure.test :refer :all]
+  (:require [cljs.test :refer :all]
             [codebreaker.core :refer :all]
-            [clojure.spec.test :as stest]))
+            [cljs.spec.test :as stest]))
 
 (deftest score-test
   (testing "Properties of the score function"

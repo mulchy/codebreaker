@@ -1,8 +1,9 @@
-(ns codebreaker.core
-  (:gen-class)
-  (:require [clojure.spec :as s]
-            [clojure.spec.test :as stest]
-            [clojure.spec.gen :as gen]))
+(ns codebreaker.app
+  (:require
+   [cljs.spec :as s]
+   [cljs.spec.test :as stest]
+   [cljs.spec.impl.gen :as gen]
+   [reagent.core :as r]))
 
 (def peg? #{:y :g :r :c :w :b})
 
@@ -40,24 +41,21 @@
     {::exact-matches exact
      ::loose-matches (- all exact)}))
 
-(defn wait-for-guess
+;; todo figure out how to represent the HTML/reagent? this returns
+(s/fdef render
+        :args ::code)
+
+(defn code-component
+  [code]
+  [:div (map-indexed (fn [idx thing]
+               ^{:key idx} [:div (str thing)])
+             code)])
+
+(defn gen-code
   []
-  (println "Guess?")
-  (read-string (read-line)))
+  (gen/generate (s/gen ::code)))
 
-(defn game
-  [secret]
-  (fn []
-    (let [guess  (wait-for-guess)
-          {:keys [::exact-matches ::loose-matches]} (score secret guess)]
-      (if (= (count secret) exact-matches)
-        (println "You win!")
-        (do
-          (println "Close, exact matches: " exact-matches "loose-matches: " loose-matches)
-          (recur))))))
-
-(defn -main
-  [& args]
-  (let [secret (gen/generate (s/gen ::code))]
-    (println "The code has " (count  secret) "colors")
-    ((game secret))))
+(defn init []
+  (enable-console-print!)
+  (r/render-component [code-component (gen-code)]
+                      (.. js/document (getElementById "container"))))
