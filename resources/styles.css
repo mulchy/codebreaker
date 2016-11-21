@@ -1,0 +1,90 @@
+#container {
+    text-align: center;
+    font-family: monospace;
+}
+
+body {
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAATklEQVQoU2O0O3X+PwMDA8MhM0NGEI0LMBKtEJsJD27YgW1R0DgEtwWrdUQrxGYLY8V5iDUdhghrKFOITfenmXFgW/jSF+H3DNEKsdkCAO99IAvXcD3VAAAAAElFTkSuQmCC) repeat;
+}
+
+main {
+    padding: 20px;
+    margin: 0 auto;
+    width: 80%;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, .6);
+}
+
+button {
+    background-color: cyan;
+    border: 1px solid black;
+    color: black;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 10px;
+}
+
+.title {
+    text-align: center;
+    text-transform: capitalize;
+    font-family: Codystar, monospace;
+    font-size: 2.5em;
+    font-weight: 900;
+}
+
+.circle {
+    height: 30px;
+    width:  30px;
+    margin: 5px;
+    border-radius: 50%;
+    border: 1px solid black;
+}
+
+.red {
+    background-color: red;
+}
+
+.black {
+    background-color: black;
+}
+
+.cyan {
+    background-color: cyan;
+}
+
+.yellow {
+    background-color: yellow;
+}
+
+.white {
+    background-color: white;
+}
+
+.green {
+    background-color: green;
+}
+
+.code {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    justify-content: space-around;
+    width: 200px;
+    margin: 0 auto 20px;
+}
+
+.code li {
+    display: inline;
+}
+
+footer {
+    width: 100%;
+    font-size: small;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+}

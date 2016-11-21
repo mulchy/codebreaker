@@ -3,9 +3,12 @@
    [cljs.spec :as s]
    [cljs.spec.test :as stest]
    [cljs.spec.impl.gen :as gen]
-   [reagent.core :as r]))
+   [reagent.core :as r]
+   [clojure.pprint :refer [pprint]]))
 
-(def peg? #{:y :g :r :c :w :b})
+(def color-map {:r "red" :y "yellow" :g "green" :c "cyan" :b "black" :w "white"})
+(def color-seq (into [] (keys color-map)))
+(def peg? (into #{} (keys color-map)))
 
 (s/def ::code (s/coll-of peg? :min-count 4 :max-count 6))
 (s/def ::exact-matches nat-int?)
@@ -41,21 +44,94 @@
     {::exact-matches exact
      ::loose-matches (- all exact)}))
 
-;; todo figure out how to represent the HTML/reagent? this returns
-(s/fdef render
-        :args ::code)
-
-(defn code-component
-  [code]
-  [:div (map-indexed (fn [idx thing]
-               ^{:key idx} [:div (str thing)])
-             code)])
+;;TODO tests
 
 (defn gen-code
   []
   (gen/generate (s/gen ::code)))
 
+(defn initial-state
+  []
+  (let [secret (gen-code)]
+    {:score    {::exact-matches 0
+                ::loose-matches 0}
+     :tries    0
+     :secret   secret
+     :guess    (mapv (constantly :c) secret)}))
+
+(def state
+  (r/atom (initial-state)))
+
+(defn next-color
+  [color]
+  (second (drop-while #(not= color %) (cycle color-seq))))
+
+(defn color-component
+  [state index]
+  (fn []
+    [:li
+     {:on-click #(swap! state update-in [:guess index] next-color)}
+     [:div
+      {:class (str "circle"
+                   " "
+                   ((get-in @state [:guess index]) color-map))}]]))
+
+(defn restart!
+  []
+  (reset! state (initial-state)))
+
+(defn score!
+  [state]
+  (let [{:keys [secret guess] old-score :score}            @state
+        {exact ::exact-matches :as new-score}              (score secret guess)]
+    (if (= (count secret) exact)
+      (do
+        (js/alert "You Win!")
+        (restart!))
+      (swap! state (fn [state]
+                     (-> state
+                         (assoc :score new-score)
+                         (update :tries inc)))))))
+
+(defn code-component
+  [state]
+  (fn []
+    [:div
+     [:ul
+      {:class "code"}
+      (map-indexed (fn [idx _]
+                     ^{:key idx} [color-component state idx])
+                   (:secret @state))]
+     ]))
+
+(defn score-component
+  [state]
+  (fn []
+    (let [{{exact ::exact-matches
+             loose ::loose-matches} :score
+            tries                   :tries}   @state]
+      [:div
+       [:p (str "Exact-matches: " exact)]
+       [:p (str "Loose-matches: " loose)]
+       [:p (str "Tries: "         tries)]
+       [:div [:button {:on-click #(score! state)} "Guess"]]])))
+
+(defn code-and-score
+  [state]
+  [:div
+   [code-component state]
+   [score-component state]])
+
+(defn debug
+  [state]
+  [:pre
+   (with-out-str
+     (pprint @state))])
+
 (defn init []
-  (enable-console-print!)
-  (r/render-component [code-component (gen-code)]
-                      (.. js/document (getElementById "container"))))
+  (r/render-component [code-and-score state]
+                      (.. js/document (getElementById "container")))
+
+  (comment
+    (r/render-component [debug state]
+                        (.. js/document (getElementById "debug")))))
